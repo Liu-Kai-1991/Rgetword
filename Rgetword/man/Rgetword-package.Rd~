@@ -6,8 +6,7 @@
 Returning the words repeatly appeared in a text
 }
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+This is an useful tool for text mining. The function r_getword returns the words repeatly appeared in a text.
 }
 \details{
 \tabular{ll}{
@@ -17,12 +16,15 @@ Version: \tab 1.0\cr
 Date: \tab 2014-12-29\cr
 License: \tab GPL (>= 2)\cr
 }
-~~ An overview of how to use the package, including the most important functions ~~
+Usage: r_getword(text, min, max, exclude)
+min: Int, minimum length of the words
+max: Int, maximum length of the words
+exclude: Boolean, whether exclude the words which included in other words
 }
 \author{
 Kai Liu
 
-Maintainer: Kai Liu <gba1991@163.com>
+Maintainer: Kai Liu <kai_liu@outlook.com>
 }
 \references{
 ~~ Literature or other references for background information ~~
@@ -34,5 +36,9 @@ Maintainer: Kai Liu <gba1991@163.com>
 ~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-%% ~~ simple examples of the most important functions ~~
+r_getword("asdf12asdf",2,4, FALSE)
+[1] "asdf" "df"   "sdf" 
+
+r_getword("阿斯蒂芬阿斯蒂芬",1,4,TRUE)
+[1] "阿斯蒂芬"
 }
