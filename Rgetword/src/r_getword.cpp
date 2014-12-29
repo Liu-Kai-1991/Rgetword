@@ -1,17 +1,8 @@
-/*
- * getword.cpp
- *
- *  Created on: 2014??12??25??
- *      Author: ????
- *      Usage: Compile this soursefile as getword.exe (windows) or getword (linux).
- *             Run "getword <inputfile >outputfile" in the terminal.
- *             IMPORTANT: this program is designed for only utf8 or unicode encoding system
- */
- 
 #include<iostream>
 #include<string>
 #include<vector>
 #include<set>
+#include<algorithm> 
 #include<Rcpp.h>
 using namespace std;
 using namespace Rcpp;
@@ -29,6 +20,23 @@ public:
             else return 0;
         }
 };
+
+bool instring(string &x, string &y)
+{
+    if (y.length()<x.length()) return 0;    
+    for (int i = y.length() - x.length(); i>=0; i--)
+    {
+        bool flag = 1;
+        for (int j = 0; j<x.length(); j++)
+            if (x[j]!=y[i+j])
+            {
+                flag = 0;
+                break;
+            }
+        if (flag) return 1;
+    }
+    return 0;
+}
 
 vector<string> Chinese_String_Convert_utf8(string &str)
 {
@@ -174,15 +182,18 @@ vector<int> getheight(vector<int> &rank, vector<string> &charlist, vector<int> &
             h[i] = 0;
         else h[i] = h[i-1]-1;
         while (rank[i]>0 && i+h[i]<charlist.size() && sa[rank[i]-1] + h[i] < charlist.size() && charlist[i+h[i]] == charlist[sa[rank[i]-1] + h[i]])
-        {
-            h[i]++;
-        }
+            h[i]++;        
         height[rank[i]] = h[i];
     }
     return height;
 }
 
-vector<string> c_getword(string str, int min_l, int max_l)
+bool cmp_string_length(const string &x,const string &y) 
+{
+    return x.length() > y.length();
+}
+
+vector<string> c_getword(string str, int min_l, int max_l, bool exclude_in)
 {
     vector<string> charlist = Chinese_String_Convert_utf8(str);
     vector<int> rank = Get_Initial_Rank(charlist);
@@ -200,16 +211,34 @@ vector<string> c_getword(string str, int min_l, int max_l)
     vector<string> result;
     for (set<string>::iterator i = hash.begin(); i!=hash.end(); i++)    
         result.push_back((*i));
+    if (exclude_in)
+    {
+        sort(result.begin(), result.end(), cmp_string_length);
+        vector<string> result_ex;
+        for (vector<string>::iterator i = result.begin(); i!=result.end(); i++)
+        {
+            bool flag = 0;
+            for (vector<string>::iterator j = result_ex.begin(); j!=result_ex.end();j++)            
+                if (instring((*i),(*j)))
+                {
+                    flag = 1;
+                    break;
+                }
+            if (!flag) result_ex.push_back((*i));
+        }
+        return result_ex;
+    }
     return result;
 }
 
 // [[Rcpp::export]]
-CharacterVector r_getword(SEXP test, SEXP min_l, SEXP max_l) 
+CharacterVector r_getword(SEXP text, SEXP min_l, SEXP max_l, SEXP para) 
 {
+    bool exclude_in = Rcpp::as<bool>(para);
     int min_length = Rcpp::as<int>(min_l);
     int max_length = Rcpp::as<int>(max_l);
-    std::string str = Rcpp::as<std::string>(test); 
-    vector<string> result = c_getword(str,min_length,max_length);    
+    std::string str = Rcpp::as<std::string>(text); 
+    vector<string> result = c_getword(str,min_length,max_length,exclude_in);    
     CharacterVector out(result.size());
     for (int i =0;i<result.size();i++)
     {
@@ -217,6 +246,3 @@ CharacterVector r_getword(SEXP test, SEXP min_l, SEXP max_l)
     }
     return out;
 }
-
-
-
