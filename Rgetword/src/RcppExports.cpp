@@ -6,16 +6,17 @@
 using namespace Rcpp;
 
 // r_getword
-CharacterVector r_getword(SEXP test, SEXP min_l, SEXP max_l);
-RcppExport SEXP Rgetword_r_getword(SEXP testSEXP, SEXP min_lSEXP, SEXP max_lSEXP) {
+CharacterVector r_getword(SEXP text, SEXP min_l, SEXP max_l, SEXP para);
+RcppExport SEXP Rgetword_r_getword(SEXP textSEXP, SEXP min_lSEXP, SEXP max_lSEXP, SEXP paraSEXP) {
 BEGIN_RCPP
     SEXP __sexp_result;
     {
         Rcpp::RNGScope __rngScope;
-        Rcpp::traits::input_parameter< SEXP >::type test(testSEXP );
+        Rcpp::traits::input_parameter< SEXP >::type text(textSEXP );
         Rcpp::traits::input_parameter< SEXP >::type min_l(min_lSEXP );
         Rcpp::traits::input_parameter< SEXP >::type max_l(max_lSEXP );
-        CharacterVector __result = r_getword(test, min_l, max_l);
+        Rcpp::traits::input_parameter< SEXP >::type para(paraSEXP );
+        CharacterVector __result = r_getword(text, min_l, max_l, para);
         PROTECT(__sexp_result = Rcpp::wrap(__result));
     }
     UNPROTECT(1);
