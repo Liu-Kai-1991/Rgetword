@@ -17,9 +17,13 @@ Date: \tab 2014-12-29\cr
 License: \tab GPL (>= 2)\cr
 }
 Usage: r_getword(text, min, max, exclude)
+
 	text: character
+
 	min: Int, minimum length of the words
+
 	max: Int, maximum length of the words
+
 	exclude: Boolean, whether exclude the words which included in other words
 }
 \author{
@@ -28,14 +32,10 @@ Kai Liu
 Maintainer: Kai Liu <kai_liu@outlook.com>
 }
 \references{
-~~ Literature or other references for background information ~~
+http://en.wikipedia.org/wiki/Suffix_array
 }
 ~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
 \keyword{ package }
-\seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
 \examples{
 r_getword("asdf12asdf",2,4, FALSE)
 [1] "asdf" "df"   "sdf" 
