@@ -7,6 +7,7 @@
 using namespace std;
 using namespace Rcpp;
 
+// Tkey is a class contains an id and two keys.
 class Tkey
 {
 public:
@@ -21,6 +22,7 @@ public:
         }
 };
 
+// Check whether a string is a substring of another string
 bool instring(string &x, string &y)
 {
     if (y.length()<x.length()) return 0;    
@@ -38,13 +40,16 @@ bool instring(string &x, string &y)
     return 0;
 }
 
+// Every Chinese character encoded in utf8 is group of 3 char types in C++
+// This function convert a string into a list of strings. Each string in the list
+// has a length of 3
 vector<string> Chinese_String_Convert_utf8(string &str)
 {
     vector<string> charlist;
     for (string::iterator i = str.begin(); i!= str.end(); i++)
     {
         string temp = "";       
-        if (int(*i)<0)
+        if (int(*i)<0) //If this char is encode as ASCII then do nothing
         {
             temp+=(*i);
             i++;
@@ -59,13 +64,16 @@ vector<string> Chinese_String_Convert_utf8(string &str)
     return charlist;
 }
 
+// Every Chinese character encoded in unicode is group of 2 char types in C++
+// This function convert a string into a list of strings. Each string in the list
+// has a length of 3
 vector<string> Chinese_String_Convert_unicode(string &str)
 {
     vector<string> charlist;
     for (string::iterator i = str.begin(); i!= str.end(); i++)
     {
         string temp = "";        
-        if (int(*i)<0)
+        if (int(*i)<0) //If this char is encode as ASCII then do nothing
         {
             temp+=(*i);
             i++;
@@ -78,6 +86,7 @@ vector<string> Chinese_String_Convert_unicode(string &str)
     return charlist;
 }
 
+// Quick sort
 void qsort(vector<string> &charlist, vector<int> &idlist, int l, int r)
 {
     int i = l;
@@ -100,6 +109,7 @@ void qsort(vector<string> &charlist, vector<int> &idlist, int l, int r)
     if (j>l) qsort(charlist,idlist,l,j);    
 }
 
+// Sort the text according to the characters, and get the rank
 vector<int> Get_Initial_Rank(vector<string> &charlist)
 {
     vector<int> idlist;
@@ -154,6 +164,7 @@ void rank_sort(int delta, vector<int> &rank)
         else rank[list[i].id] = rank[list[i-1].id];
 }
 
+// Construct the suffix array
 vector<int> doubling(vector<int> &rank)
 {
     rank_sort(0,rank);
@@ -170,6 +181,7 @@ vector<int> doubling(vector<int> &rank)
     return sa;
 }
 
+// Height is length of repeated patterns
 vector<int> getheight(vector<int> &rank, vector<string> &charlist, vector<int> &sa)
 {
     vector<int> h;
@@ -188,18 +200,30 @@ vector<int> getheight(vector<int> &rank, vector<string> &charlist, vector<int> &
     return height;
 }
 
+
+// Compare the length of two string
 bool cmp_string_length(const string &x,const string &y) 
 {
     return x.length() > y.length();
 }
 
+
+// This is the C++ implementation for word segmentation
+//
+//min_l: integer, minimum length of the word
+//max_l: integer, maximum length of the word
+//exclude_in: bool, whether exclude words as a substring of other words 
 vector<string> c_getword(string str, int min_l, int max_l, bool exclude_in)
 {
-    vector<string> charlist = Chinese_String_Convert_utf8(str);
+    vector<string> charlist = Chinese_String_Convert_utf8(str); 
+  
+    //Construct the suffix array
     vector<int> rank = Get_Initial_Rank(charlist);
     vector<int> sa = doubling(rank);
     vector<int> height = getheight(rank,charlist,sa);
     set<string> hash;
+    
+    //Find repeated patterns as words
     for (int i =1; i < sa.size(); i++)
     {           
         if (height[i]<min_l || height[i]>max_l) continue;
@@ -211,7 +235,9 @@ vector<string> c_getword(string str, int min_l, int max_l, bool exclude_in)
     vector<string> result;
     for (set<string>::iterator i = hash.begin(); i!=hash.end(); i++)    
         result.push_back((*i));
-    if (exclude_in)
+    
+    //Delelte the words that are substring of other words 
+    if (exclude_in) 
     {
         sort(result.begin(), result.end(), cmp_string_length);
         vector<string> result_ex;
@@ -232,9 +258,12 @@ vector<string> c_getword(string str, int min_l, int max_l, bool exclude_in)
 }
 
 // [[Rcpp::export]]
+//This is the R interface for the C++ function
+//
 //text: The input text
-//min_l: minimum length of the word
-//max_l: maximum length of the word
+//min_l: integer, minimum length of the word
+//max_l: integer, maximum length of the word
+//para: bool, whether exclude words as a substring of other words 
 CharacterVector r_getword(SEXP text, SEXP min_l, SEXP max_l, SEXP para) 
 {
     bool exclude_in = Rcpp::as<bool>(para);
