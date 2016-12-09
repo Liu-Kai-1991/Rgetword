@@ -232,6 +232,9 @@ vector<string> c_getword(string str, int min_l, int max_l, bool exclude_in)
 }
 
 // [[Rcpp::export]]
+//text: The input text
+//min_l: minimum length of the word
+//max_l: maximum length of the word
 CharacterVector r_getword(SEXP text, SEXP min_l, SEXP max_l, SEXP para) 
 {
     bool exclude_in = Rcpp::as<bool>(para);
